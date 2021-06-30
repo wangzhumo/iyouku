@@ -6,6 +6,7 @@ require (
 	github.com/beego/bee/v2 v2.0.2 // indirect
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3 // indirect
 	github.com/go-delve/delve v1.6.1 // indirect
+	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
