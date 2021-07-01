@@ -1,12 +1,13 @@
 package models
 
 import (
+	"com.wangzhumo.iyouku/common"
 	"github.com/beego/beego/v2/client/orm"
 	"time"
 )
 
 type User struct {
-	Id       int64
+	UID      int64
 	Nick     string
 	Name     string
 	Password string
@@ -47,6 +48,7 @@ func IsPhoneRegister(mobile string) (status bool) {
 func UserSave(mobile string, encodePsd string) (err error) {
 	// 获取orm
 	o := orm.NewOrm()
+	uid, _ := common.GenerateUid()
 	user := User{
 		Mobile:   mobile,
 		Password: encodePsd,
@@ -54,6 +56,7 @@ func UserSave(mobile string, encodePsd string) (err error) {
 		Nick:     "",
 		Name:     "",
 		AddTime:  time.Now().Unix(),
+		UID:      uid,
 	}
 
 	// 存入数据库

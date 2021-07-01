@@ -31,7 +31,7 @@ func (uc *UserController) SaveRegister() {
 		_ = uc.ServeJSON()
 	}
 	// error format
-	matchPhone, err := regexp.MatchString(`^1(234578)[0-9]\d{8}$`, mobile)
+	matchPhone, err := regexp.MatchString(`^1(2|3|4|5|7|8)[0-9]\d{8}$`, mobile)
 	if !matchPhone {
 		uc.Data["json"] = ErrorResp(4001, PhoneFormatError)
 		_ = uc.ServeJSON()
@@ -42,11 +42,11 @@ func (uc *UserController) SaveRegister() {
 		uc.Data["json"] = ErrorResp(4003, PasswordEmpty)
 		_ = uc.ServeJSON()
 	}
-	matchPassword, err := regexp.MatchString(`^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$`, password)
-	if !matchPassword || err != nil {
-		uc.Data["json"] = ErrorResp(4004, PasswordFormatError)
-		_ = uc.ServeJSON()
-	}
+	//matchPassword, err := regexp.MatchString(`^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$`, password)
+	//if !matchPassword || err != nil {
+	//	uc.Data["json"] = ErrorResp(4004, PasswordFormatError)
+	//	_ = uc.ServeJSON()
+	//}
 
 	// check phone register status
 	registerStatus := models.IsPhoneRegister(mobile)
@@ -55,7 +55,7 @@ func (uc *UserController) SaveRegister() {
 		_ = uc.ServeJSON()
 	} else {
 		// 否则开始注册流程
-		err := models.UserSave(mobile, Md5Psd(password))
+		err = models.UserSave(mobile, Md5Psd(password))
 		if err == nil {
 			uc.Data["json"] = SucceedResp(5000, RegisterSucceed, nil, 0)
 			_ = uc.ServeJSON()
@@ -63,6 +63,5 @@ func (uc *UserController) SaveRegister() {
 			uc.Data["json"] = ErrorResp(0, RegisterFail)
 			_ = uc.ServeJSON()
 		}
-
 	}
 }
