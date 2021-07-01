@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	UID      int64
+	UID      int64 `orm:"pk"`
 	Nick     string
 	Name     string
 	Password string
@@ -15,6 +15,10 @@ type User struct {
 	AddTime  int64
 	Mobile   string
 	Avatar   string
+}
+
+func (u *User) TableName() string {
+	return "ucenter"
 }
 
 type Profile struct {
