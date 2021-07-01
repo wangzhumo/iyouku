@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	defaultDB, _ := beego.AppConfig.String("dev_windows")
+	defaultDB, _ := beego.AppConfig.String("defaultDb")
 	orm.RegisterDriver("mysql", orm.DRMySQL)
 	orm.RegisterDataBase("default", "mysql", defaultDB)
 

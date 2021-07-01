@@ -1,26 +1,19 @@
 package models
 
 import (
-	"errors"
-	"strconv"
+	"github.com/beego/beego/v2/client/orm"
 	"time"
 )
 
-var (
-	UserList map[string]*User
-)
-
-func init() {
-	UserList = make(map[string]*User)
-	u := User{"user_11111", "astaxie", "11111", Profile{"male", 20, "Singapore", "astaxie@gmail.com"}}
-	UserList["user_11111"] = &u
-}
-
 type User struct {
-	Id       string
-	Username string
+	Id       int64
+	Nick     string
+	Name     string
 	Password string
-	Profile  Profile
+	Status   int
+	AddTime  int64
+	Mobile   string
+	Avatar   string
 }
 
 type Profile struct {
@@ -30,57 +23,40 @@ type Profile struct {
 	Email   string
 }
 
-func AddUser(u User) string {
-	u.Id = "user_" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	UserList[u.Id] = &u
-	return u.Id
+func init() {
+	orm.RegisterModel(new(User))
 }
 
-func GetUser(uid string) (u *User, err error) {
-	if u, ok := UserList[uid]; ok {
-		return u, nil
+// IsPhoneRegister 手机号是否已经注册
+func IsPhoneRegister(mobile string) (status bool) {
+	// 获取orm
+	o := orm.NewOrm()
+	user := User{Mobile: mobile}
+
+	// 查询数据
+	err := o.Read(&user, "Mobile")
+	if err != orm.ErrNoRows {
+		return false
+	} else if err == orm.ErrMissPK {
+		return false
 	}
-	return nil, errors.New("User not exists")
+	return true
 }
 
-func GetAllUsers() map[string]*User {
-	return UserList
-}
-
-func UpdateUser(uid string, uu *User) (a *User, err error) {
-	if u, ok := UserList[uid]; ok {
-		if uu.Username != "" {
-			u.Username = uu.Username
-		}
-		if uu.Password != "" {
-			u.Password = uu.Password
-		}
-		if uu.Profile.Age != 0 {
-			u.Profile.Age = uu.Profile.Age
-		}
-		if uu.Profile.Address != "" {
-			u.Profile.Address = uu.Profile.Address
-		}
-		if uu.Profile.Gender != "" {
-			u.Profile.Gender = uu.Profile.Gender
-		}
-		if uu.Profile.Email != "" {
-			u.Profile.Email = uu.Profile.Email
-		}
-		return u, nil
+// UserSave 创建用户
+func UserSave(mobile string, encodePsd string) (err error) {
+	// 获取orm
+	o := orm.NewOrm()
+	user := User{
+		Mobile:   mobile,
+		Password: encodePsd,
+		Status:   1,
+		Nick:     "",
+		Name:     "",
+		AddTime:  time.Now().Unix(),
 	}
-	return nil, errors.New("User Not Exist")
-}
 
-func Login(username, password string) bool {
-	for _, u := range UserList {
-		if u.Username == username && u.Password == password {
-			return true
-		}
-	}
-	return false
-}
-
-func DeleteUser(uid string) {
-	delete(UserList, uid)
+	// 存入数据库
+	_, err = o.Insert(user)
+	return
 }
