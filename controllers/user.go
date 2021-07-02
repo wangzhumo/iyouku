@@ -57,11 +57,52 @@ func (uc *UserController) SaveRegister() {
 		// 否则开始注册流程
 		err = models.UserSave(mobile, Md5Psd(password))
 		if err == nil {
-			uc.Data["json"] = SucceedResp(5000, RegisterSucceed, nil, 0)
+			uc.Data["json"] = SucceedResp(0, RegisterSucceed, nil, 0)
 			_ = uc.ServeJSON()
 		} else {
-			uc.Data["json"] = ErrorResp(0, RegisterFail)
+			uc.Data["json"] = ErrorResp(5000, RegisterFail)
 			_ = uc.ServeJSON()
 		}
+	}
+}
+
+// Login  用户登陆功能
+// @router /login/do [get]
+func (uc *UserController) Login() {
+	// 定义接受的参数
+	var (
+		mobile   string
+		password string
+	)
+	// 获取参数
+	mobile = uc.GetString("mobile")
+	password = uc.GetString("password")
+
+	// 验证手机号是否合法
+	// empty
+	if mobile == "" {
+		uc.Data["json"] = ErrorResp(4001, PhoneEmpty)
+		_ = uc.ServeJSON()
+	}
+
+	// empty psd
+	if password == "" {
+		uc.Data["json"] = ErrorResp(4003, PasswordEmpty)
+		_ = uc.ServeJSON()
+	}
+
+	// 查询用户
+	uid, nick := models.UserLogin(mobile, Md5Psd(password))
+	if uid > 0 {
+		uc.Data["json"] = SucceedResp(0, LoginSucceed,
+			map[string]interface{}{
+				"uid":  uid,
+				"nick": nick,
+			},
+			1)
+		_ = uc.ServeJSON()
+	} else {
+		uc.Data["json"] = ErrorResp(5001, LoginFail)
+		_ = uc.ServeJSON()
 	}
 }

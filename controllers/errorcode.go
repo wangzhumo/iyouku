@@ -8,3 +8,5 @@ const PasswordFormatError = "至少8个字符，至少1个大写字母，1个小
 
 const RegisterSucceed = "注册成功"
 const RegisterFail = "注册失败"
+const LoginSucceed = "登录成功"
+const LoginFail = "登录失败"

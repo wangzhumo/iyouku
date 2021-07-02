@@ -67,3 +67,18 @@ func UserSave(mobile string, encodePsd string) (err error) {
 	_, err = o.Insert(&user)
 	return
 }
+
+// UserLogin 用户登录查询
+func UserLogin(mobile string, password string) (int64, string) {
+	o := orm.NewOrm()
+	var user User
+	// 查询用户信息
+	err := o.QueryTable("ucenter").Filter("mobile",
+		mobile).Filter("password", password).One(&user)
+	if err == orm.ErrNoRows {
+		return 0, ""
+	} else if err == orm.ErrMissPK {
+		return 0, ""
+	}
+	return user.UID, user.Nick
+}
