@@ -9,8 +9,14 @@ import (
 
 func main() {
 	defaultDB, _ := beego.AppConfig.String("defaultDb")
-	orm.RegisterDriver("mysql", orm.DRMySQL)
-	orm.RegisterDataBase("default", "mysql", defaultDB)
+	err := orm.RegisterDriver("mysql", orm.DRMySQL)
+	if err != nil {
+		return
+	}
+	err = orm.RegisterDataBase("default", "mysql", defaultDB)
+	if err != nil {
+		return
+	}
 
 	beego.Run()
 }

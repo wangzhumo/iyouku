@@ -7,12 +7,12 @@ import (
 )
 
 type User struct {
-	UID      int64 `orm:"pk"`
+	UID      int64 `orm:"column(uid);pk"`
 	Nick     string
 	Name     string
 	Password string
 	Status   int
-	AddTime  int64
+	AddTime  int64 `orm:"column(create)"`
 	Mobile   string
 	Avatar   string
 }
@@ -39,8 +39,8 @@ func IsPhoneRegister(mobile string) (status bool) {
 	user := User{Mobile: mobile}
 
 	// 查询数据
-	err := o.Read(&user, "Mobile")
-	if err != orm.ErrNoRows {
+	err := o.Read(&user, "mobile")
+	if err == orm.ErrNoRows {
 		return false
 	} else if err == orm.ErrMissPK {
 		return false
@@ -64,6 +64,6 @@ func UserSave(mobile string, encodePsd string) (err error) {
 	}
 
 	// 存入数据库
-	_, err = o.Insert(user)
+	_, err = o.Insert(&user)
 	return
 }
