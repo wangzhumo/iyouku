@@ -3,21 +3,18 @@
 
 ```sql
 
-
-Data Source: qnap Schema: iyouku Table: ucenter  -- 用户表
--- auto-generated definition
 create table ucenter
 (
-uid      bigint           not null
-primary key,
-nick     varchar(60)      not null,
-password varchar(36)      not null,
-status   int    default 0 not null,
-`create` bigint default 0 not null,
-mobile   varchar(20)      not null,
-avatar   varchar(64)      not null,
-name     varchar(20)      not null
+    uid      bigint           not null
+        primary key comment '用户ID',
+    nick     varchar(60)      not null comment '用户昵称',
+    password varchar(36)      not null comment '用户密码',
+    status   int    default 0 not null comment '用户状态',
+    `create` bigint default 0 not null comment '创建日期',
+    mobile   varchar(20)      not null comment '用户手机号',
+    avatar   varchar(64)      not null comment '用户头像',
+    name     varchar(20)      not null comment '用户姓名'
 )
-comment '用户表';
+    comment '用户表'
 
 ```
