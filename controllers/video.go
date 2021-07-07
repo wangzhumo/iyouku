@@ -16,7 +16,7 @@ func (vc *VideoController) ChannelAdvert() {
 
 	// empty check
 	if channelId == 0 {
-		vc.Data["json"] = ErrorResp(4001, VideoNoChannelID)
+		vc.Data["json"] = ErrorResp(4001, NoChannelID)
 		_ = vc.ServeJSON()
 	}
 
@@ -39,7 +39,7 @@ func (vc *VideoController) ChannelHotList() {
 
 	// empty check
 	if channelId == 0 {
-		vc.Data["json"] = ErrorResp(4001, VideoNoChannelID)
+		vc.Data["json"] = ErrorResp(4001, NoChannelID)
 		_ = vc.ServeJSON()
 	}
 
@@ -62,11 +62,11 @@ func (vc *VideoController) ChannelRecommendByRegion() {
 	channelId, _ := vc.GetInt("channelId")
 	// empty check
 	if channelId == 0 {
-		vc.Data["json"] = ErrorResp(4001, VideoNoChannelID)
+		vc.Data["json"] = ErrorResp(4001, NoChannelID)
 		_ = vc.ServeJSON()
 	}
 	if regionId == 0 {
-		vc.Data["json"] = ErrorResp(4001, VideoNoRegionID)
+		vc.Data["json"] = ErrorResp(4001, NoRegionID)
 		_ = vc.ServeJSON()
 	}
 	// get data
@@ -88,11 +88,11 @@ func (vc *VideoController) ChannelRecommendByType() {
 	channelId, _ := vc.GetInt("channelId")
 	// empty check
 	if channelId == 0 {
-		vc.Data["json"] = ErrorResp(4001, VideoNoChannelID)
+		vc.Data["json"] = ErrorResp(4001, NoChannelID)
 		_ = vc.ServeJSON()
 	}
 	if typeId == 0 {
-		vc.Data["json"] = ErrorResp(4001, VideoNoTypeID)
+		vc.Data["json"] = ErrorResp(4001, NoTypeID)
 		_ = vc.ServeJSON()
 	}
 
@@ -101,6 +101,45 @@ func (vc *VideoController) ChannelRecommendByType() {
 	// 获取到数据，可以进行返回
 	if err != nil {
 		vc.Data["json"] = ErrorResp(4004, VideoChannelTypeError)
+		_ = vc.ServeJSON()
+	} else {
+		vc.Data["json"] = SucceedResp(0, RequestOk, videos, count)
+		_ = vc.ServeJSON()
+	}
+}
+
+// ChannelVideoByParams 根据参数获取推荐视频
+// @router /channel/video [get]
+func (vc *VideoController) ChannelVideoByParams() {
+	// 频道信息
+	channelId, _ := vc.GetInt("channelId")
+	// 地区
+	regionId, _ := vc.GetInt("regionId")
+	// 类型参数
+	typeId, _ := vc.GetInt("typeId")
+	// 状态
+	status := vc.GetString("end")
+	// 排序
+	sort := vc.GetString("sort")
+	// 分页信息
+	limit, _ := vc.GetInt("limit")
+	offset, _ := vc.GetInt("offset")
+
+	// empty check 【必传的参数】
+	if channelId == 0 {
+		vc.Data["json"] = ErrorResp(4001, NoChannelID)
+		_ = vc.ServeJSON()
+	}
+
+	// 可选的参数,但是需要指定默认值
+	if limit == 0 {
+		limit = 12
+	}
+
+	count, videos, err := models.GetChannelVideoList(channelId, typeId, regionId, status, sort, offset, limit)
+	// 获取到数据，可以进行返回
+	if err != nil {
+		vc.Data["json"] = ErrorResp(4004, ChannelVideoError)
 		_ = vc.ServeJSON()
 	} else {
 		vc.Data["json"] = SucceedResp(0, RequestOk, videos, count)

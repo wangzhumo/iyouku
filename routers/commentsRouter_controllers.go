@@ -7,6 +7,24 @@ import (
 
 func init() {
 
+	beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:BasicController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:BasicController"],
+		beego.ControllerComments{
+			Method:           "ChannelRegion",
+			Router:           "/channel/region",
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:BasicController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:BasicController"],
+		beego.ControllerComments{
+			Method:           "ChannelType",
+			Router:           "/channel/type",
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
 	beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:UserController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:UserController"],
 		beego.ControllerComments{
 			Method:           "Login",
@@ -47,6 +65,24 @@ func init() {
 		beego.ControllerComments{
 			Method:           "ChannelRecommendByRegion",
 			Router:           "/channel/recommend/region",
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:VideoController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:VideoController"],
+		beego.ControllerComments{
+			Method:           "ChannelRecommendByType",
+			Router:           "/channel/recommend/type",
+			AllowHTTPMethods: []string{"get"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
+	beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:VideoController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:VideoController"],
+		beego.ControllerComments{
+			Method:           "ChannelVideoByParams",
+			Router:           "/channel/video",
 			AllowHTTPMethods: []string{"get"},
 			MethodParams:     param.Make(),
 			Filters:          nil,
