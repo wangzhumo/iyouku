@@ -54,3 +54,56 @@ func (vc *VideoController) ChannelHotList() {
 		_ = vc.ServeJSON()
 	}
 }
+
+// ChannelRecommendByRegion 根据频道地区获取推荐视频
+// @router /channel/recommend/region [get]
+func (vc *VideoController) ChannelRecommendByRegion() {
+	regionId, _ := vc.GetInt("regionId")
+	channelId, _ := vc.GetInt("channelId")
+	// empty check
+	if channelId == 0 {
+		vc.Data["json"] = ErrorResp(4001, VideoNoChannelID)
+		_ = vc.ServeJSON()
+	}
+	if regionId == 0 {
+		vc.Data["json"] = ErrorResp(4001, VideoNoRegionID)
+		_ = vc.ServeJSON()
+	}
+	// get data
+	count, videos, err := models.GetRecommendByRegionID(regionId, channelId)
+	// 获取到数据，可以进行返回
+	if err != nil {
+		vc.Data["json"] = ErrorResp(4004, VideoChannelRecommendError)
+		_ = vc.ServeJSON()
+	} else {
+		vc.Data["json"] = SucceedResp(0, RequestOk, videos, count)
+		_ = vc.ServeJSON()
+	}
+}
+
+// ChannelRecommendByType 根据频道地区获取推荐视频
+// @router /channel/recommend/type [get]
+func (vc *VideoController) ChannelRecommendByType() {
+	typeId, _ := vc.GetInt("typeId")
+	channelId, _ := vc.GetInt("channelId")
+	// empty check
+	if channelId == 0 {
+		vc.Data["json"] = ErrorResp(4001, VideoNoChannelID)
+		_ = vc.ServeJSON()
+	}
+	if typeId == 0 {
+		vc.Data["json"] = ErrorResp(4001, VideoNoTypeID)
+		_ = vc.ServeJSON()
+	}
+
+	// get data
+	count, videos, err := models.GetRecommendByTypeID(typeId, channelId)
+	// 获取到数据，可以进行返回
+	if err != nil {
+		vc.Data["json"] = ErrorResp(4004, VideoChannelTypeError)
+		_ = vc.ServeJSON()
+	} else {
+		vc.Data["json"] = SucceedResp(0, RequestOk, videos, count)
+		_ = vc.ServeJSON()
+	}
+}
