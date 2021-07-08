@@ -82,38 +82,36 @@ func GetChannelVideoList(channelId int, typeId int, regionId int, end string, so
 	// 数据
 	var params []orm.Params
 	querySeter := o.QueryTable("video")
-	querySeter.Filter("channel_id", channelId)
-	querySeter.Filter("status", 1)
+	querySeter = querySeter.Filter("channel_id", channelId)
+	querySeter = querySeter.Filter("status", 1)
 	if typeId > 0 {
-		querySeter.Filter("type_id", typeId)
+		querySeter = querySeter.Filter("type_id", typeId)
 	}
 	if regionId > 0 {
-		querySeter.Filter("regionId", regionId)
-	}
-	if end == "n" {
-		querySeter.Filter("is_end", true)
+		querySeter = querySeter.Filter("regionId", regionId)
 	}
 
 	if end == "n" {
-		querySeter.Filter("is_end", 0)
+		querySeter = querySeter.Filter("is_end", 0)
 	} else if end == "y" {
-		querySeter.Filter("is_end", 1)
+		querySeter = querySeter.Filter("is_end", 1)
 	}
 
 	if sort == SortUpdateTime {
-		querySeter.GroupBy("-episodes_update")
+		querySeter = querySeter.OrderBy("episodes_update")
 	} else if sort == SortComment {
-		querySeter.GroupBy("-comment")
+		querySeter = querySeter.OrderBy("comment")
 	} else if sort == SortAddTime {
-		querySeter.GroupBy("-add_time")
+		querySeter = querySeter.OrderBy("add_time")
 	} else {
-		querySeter.GroupBy("-add_time")
+		querySeter = querySeter.OrderBy("add_time")
 	}
 
 	// 获取总条数
 	count, _ := querySeter.Values(&params, "id", "title", "sub_title", "add_time", "imgh", "imgv", "episodes_count", "is_end")
-	querySeter.Limit(limit, offset)
+
 	// 获取指定的Limit数据
+	querySeter = querySeter.Limit(limit, offset)
 	_, err := querySeter.Values(&params, "id", "title", "sub_title", "add_time", "imgh", "imgv", "episodes_count", "is_end")
 	return count, params, err
 }
