@@ -25,6 +25,15 @@ func init() {
 			Filters:          nil,
 			Params:           nil})
 
+	beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:CommentController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:CommentController"],
+		beego.ControllerComments{
+			Method:           "GetCommentList",
+			Router:           "/comment/list",
+			AllowHTTPMethods: []string{"*"},
+			MethodParams:     param.Make(),
+			Filters:          nil,
+			Params:           nil})
+
 	beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:UserController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:UserController"],
 		beego.ControllerComments{
 			Method:           "Login",
@@ -92,7 +101,7 @@ func init() {
 		beego.ControllerComments{
 			Method:           "GetVideoEpisode",
 			Router:           "/video/episode",
-			AllowHTTPMethods: []string{"*"},
+			AllowHTTPMethods: []string{"get"},
 			MethodParams:     param.Make(),
 			Filters:          nil,
 			Params:           nil})
