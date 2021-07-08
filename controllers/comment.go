@@ -66,3 +66,41 @@ func (cc *CommentController) GetCommentList() {
 		_ = cc.ServeJSON()
 	}
 }
+
+// InsertComment 写入一条评论
+// @router /comment/list [*]
+func (cc *CommentController) InsertComment() {
+	// 评论内容
+	content := cc.GetString("content")
+	// 用户
+	uid, _ := cc.GetInt("uid")
+	episodesId, _ := cc.GetInt("episodesId")
+	videoId, _ := cc.GetInt("videoId")
+
+	// empty check
+	if len(content) == 0 {
+		cc.Data["json"] = ErrorResp(4001, NoContent)
+		_ = cc.ServeJSON()
+	}
+	if uid == 0 {
+		cc.Data["json"] = ErrorResp(2001, RequireLogin)
+		_ = cc.ServeJSON()
+	}
+	if episodesId == 0 {
+		cc.Data["json"] = ErrorResp(4001, NoEpisodesID)
+		_ = cc.ServeJSON()
+	}
+	if videoId == 0 {
+		cc.Data["json"] = ErrorResp(4001, NoVideoID)
+		_ = cc.ServeJSON()
+	}
+
+	err := models.SaveComment(content, uid, episodesId, videoId)
+	if err != nil {
+		cc.Data["json"] = ErrorResp(5000, CommentInsertError)
+		_ = cc.ServeJSON()
+	} else {
+		cc.Data["json"] = SucceedResp(0, RequestOk, nil, 1)
+		_ = cc.ServeJSON()
+	}
+}

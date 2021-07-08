@@ -1,6 +1,9 @@
 package models
 
-import "github.com/beego/beego/v2/client/orm"
+import (
+	"github.com/beego/beego/v2/client/orm"
+	"time"
+)
 
 type Comment struct {
 	Id           int
@@ -9,6 +12,7 @@ type Comment struct {
 	AddTimeTitle string
 	UserId       int
 	Stamp        int
+	Status       int
 	PraiseCount  int
 	EpisodesId   int
 	VideoId      int
@@ -34,4 +38,27 @@ func GetCommentsByEpisodesId(episodesId int, offset int, limit int) (int64, []Co
 		"ORDER BY add_time DESC  LIMIT ?,?", episodesId, offset, limit).QueryRows(&comments)
 
 	return queryRows, comments, err
+}
+
+// SaveComment 保存一条评论
+func SaveComment(context string, userId int, episodesId int, videoId int) (err error) {
+	newOrm := orm.NewOrm()
+	var comment = Comment{
+		Content:    context,
+		UserId:     userId,
+		EpisodesId: episodesId,
+		VideoId:    videoId,
+		Stamp:      0,
+		Status:     1,
+		AddTime:    time.Now().Unix()}
+
+	_, err = newOrm.Insert(&comment)
+
+	if err == nil {
+		// 修改视频的总评论数
+		newOrm.Raw("UPDATE video SET comment=comment+1 WHERE id=?", videoId)
+		// 修改剧集评论数
+		newOrm.Raw("UPDATE video_episodes SET comment=comment+1 WHERE id=?", videoId)
+	}
+	return
 }
