@@ -1,3 +1,4 @@
+// Package routers
 // @APIVersion 1.0.0
 // @Title beego Test API
 // @Description beego has a very cool tools to autogenerate documents for your API
@@ -17,4 +18,5 @@ func init() {
 	beego.Include(&controllers.VideoController{})
 	beego.Include(&controllers.BasicController{})
 	beego.Include(&controllers.CommentController{})
+	beego.Include(&controllers.TopController{})
 }

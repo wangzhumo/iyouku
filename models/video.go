@@ -140,3 +140,27 @@ func GetVideoEpisodes(videoID int) (int64, []VideoDate, error) {
 	rows, err := newOrm.Raw("SELECT id, title, add_time, num, play_url, comment FROM video_episodes where video_id = ? AND status =1 ORDER BY num ASC;", videoID).QueryRows(&episodes)
 	return rows, episodes, err
 }
+
+// GetChannelTop 通过channelId获取视频的排行
+func GetChannelTop(channelId int) (int64, []VideoDate, error) {
+	o := orm.NewOrm()
+	var videos []VideoDate
+
+	rows, err := o.Raw("SELECT d, title, sub_title, "+
+		"channel_id, add_time, imgh, imgv ,episodes_count "+
+		"FROM video WHERE status=0 AND channel_id=?  "+
+		"ORDER BY comment DESC LIMIT 10", channelId).QueryRows(&videos)
+	return rows, videos, err
+}
+
+// GetTypeTop 通过typeId获取视频的排行
+func GetTypeTop(typeId int) (int64, []VideoDate, error) {
+	o := orm.NewOrm()
+	var videos []VideoDate
+
+	rows, err := o.Raw("SELECT d, title, sub_title, "+
+		"channel_id, add_time, imgh, imgv ,episodes_count "+
+		"FROM video WHERE status=0 AND type_id=?  "+
+		"ORDER BY comment DESC LIMIT 10", typeId).QueryRows(&videos)
+	return rows, videos, err
+}

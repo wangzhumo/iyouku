@@ -9,7 +9,7 @@ type Comment struct {
 	Id           int
 	Content      string
 	AddTime      int64
-	AddTimeTitle string
+	AddTimeTitle string  `orm:"-"`
 	UserId       int
 	Stamp        int
 	Status       int
@@ -43,14 +43,15 @@ func GetCommentsByEpisodesId(episodesId int, offset int, limit int) (int64, []Co
 // SaveComment 保存一条评论
 func SaveComment(context string, userId int, episodesId int, videoId int) (err error) {
 	newOrm := orm.NewOrm()
+	unixTime := time.Now().Unix()
 	var comment = Comment{
-		Content:    context,
-		UserId:     userId,
-		EpisodesId: episodesId,
-		VideoId:    videoId,
-		Stamp:      0,
-		Status:     1,
-		AddTime:    time.Now().Unix()}
+		Content:      context,
+		UserId:       userId,
+		EpisodesId:   episodesId,
+		VideoId:      videoId,
+		Stamp:        0,
+		Status:       1,
+		AddTime:      unixTime}
 
 	_, err = newOrm.Insert(&comment)
 

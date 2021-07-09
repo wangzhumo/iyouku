@@ -4,7 +4,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	beego "github.com/beego/beego/v2/server/web"
-	"time"
 )
 
 // BaseResponse 返回的结构体
@@ -47,8 +46,3 @@ func Md5Psd(psd string) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// DateFormat 格式化时间
-func DateFormat(date int64) string {
-	unix := time.Unix(date, 0)
-	return unix.Format("2006-01-02")
-}

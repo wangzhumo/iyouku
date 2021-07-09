@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"com.wangzhumo.iyouku/common"
 	"com.wangzhumo.iyouku/models"
 	beego "github.com/beego/beego/v2/server/web"
 )
@@ -53,7 +54,7 @@ func (cc *CommentController) GetCommentList() {
 			commentInfo.Id = comment.Id
 			commentInfo.Content = comment.Content
 			commentInfo.AddTime = comment.AddTime
-			commentInfo.AddTimeTitle = DateFormat(comment.AddTime)
+			commentInfo.AddTimeTitle = common.DateFormat(comment.AddTime)
 			commentInfo.PraiseCount = comment.PraiseCount
 			commentInfo.UserId = comment.UserId
 			commentInfo.Stamp = comment.Stamp
@@ -68,7 +69,7 @@ func (cc *CommentController) GetCommentList() {
 }
 
 // InsertComment 写入一条评论
-// @router /comment/list [*]
+// @router /comment/save [*]
 func (cc *CommentController) InsertComment() {
 	// 评论内容
 	content := cc.GetString("content")
@@ -95,6 +96,7 @@ func (cc *CommentController) InsertComment() {
 		_ = cc.ServeJSON()
 	}
 
+	// 保存到数据库
 	err := models.SaveComment(content, uid, episodesId, videoId)
 	if err != nil {
 		cc.Data["json"] = ErrorResp(5000, CommentInsertError)
