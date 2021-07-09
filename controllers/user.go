@@ -4,6 +4,8 @@ import (
 	"com.wangzhumo.iyouku/models"
 	beego "github.com/beego/beego/v2/server/web"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 // UserController Operations about Users
@@ -42,11 +44,6 @@ func (uc *UserController) SaveRegister() {
 		uc.Data["json"] = ErrorResp(4003, PasswordEmpty)
 		_ = uc.ServeJSON()
 	}
-	//matchPassword, err := regexp.MatchString(`^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$`, password)
-	//if !matchPassword || err != nil {
-	//	uc.Data["json"] = ErrorResp(4004, PasswordFormatError)
-	//	_ = uc.ServeJSON()
-	//}
 
 	// check phone register status
 	registerStatus := models.IsPhoneRegister(mobile)
@@ -108,8 +105,8 @@ func (uc *UserController) Login() {
 }
 
 // SendPushMessage 发送推送消息
-// @router /send/message
-func (uc *UserController) SendPushMessage(){
+// @router /send/message [post]
+func (uc *UserController) SendPushMessage() {
 	// 评论内容
 	content := uc.GetString("content")
 	// 用户
@@ -126,6 +123,21 @@ func (uc *UserController) SendPushMessage(){
 	}
 
 	// 保存数据
-	// models.SaveComment(content)
+	messageId, err := models.SendMessage(content)
+	if err != nil {
+		uc.Data["json"] = ErrorResp(2001, SendMessageError)
+		_ = uc.ServeJSON()
+	} else {
+		// 设置到指定的用户上去
+		splitUid := strings.Split(uids, ",")
+		if len(splitUid) > 0 {
+			for _, uid := range splitUid {
+				userId, _ := strconv.Atoi(uid)
+				_, _ = models.SendMessageToUser(messageId, userId)
+			}
+			uc.Data["json"] = SucceedResp(0, RequestOk, nil, 1)
+			_ = uc.ServeJSON()
+		}
+	}
 
 }
