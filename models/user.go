@@ -6,15 +6,23 @@ import (
 	"time"
 )
 
+// User self
 type User struct {
-	UID      int64 `orm:"column(uid);pk"`
-	Nick     string
+	Id       int64
 	Name     string
 	Password string
+	AddTime  int64
 	Status   int
-	AddTime  int64 `orm:"column(create)"`
 	Mobile   string
 	Avatar   string
+}
+
+// UserInfo normal user info
+type UserInfo struct {
+	Id      int64  `json:"id"`
+	Name    string `json:"name"`
+	AddTime string `json:"addTime"`
+	Avatar  string `json:"avatar"`
 }
 
 func (u *User) TableName() string {
@@ -57,10 +65,9 @@ func UserSave(mobile string, encodePsd string) (err error) {
 		Mobile:   mobile,
 		Password: encodePsd,
 		Status:   1,
-		Nick:     "",
 		Name:     "",
 		AddTime:  time.Now().Unix(),
-		UID:      uid,
+		Id:       uid,
 	}
 
 	// 存入数据库
@@ -73,12 +80,21 @@ func UserLogin(mobile string, password string) (int64, string) {
 	o := orm.NewOrm()
 	var user User
 	// 查询用户信息
-	err := o.QueryTable("ucenter").Filter("mobile",
+	err := o.QueryTable("user").Filter("mobile",
 		mobile).Filter("password", password).One(&user)
 	if err == orm.ErrNoRows {
 		return 0, ""
 	} else if err == orm.ErrMissPK {
 		return 0, ""
 	}
-	return user.UID, user.Nick
+	return user.Id, user.Name
+}
+
+// GetUserInfo 查询用户信息（normal）
+func GetUserInfo(userId int64) (UserInfo, error) {
+	o := orm.NewOrm()
+	var user UserInfo
+	err := o.Raw("SELECT id,name,add_time,avatar "+
+		"FROM user WHERE id=? LIMIT 1", userId).QueryRow(&user)
+	return user, err
 }

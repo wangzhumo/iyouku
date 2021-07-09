@@ -96,8 +96,8 @@ func (uc *UserController) Login() {
 	if uid > 0 {
 		uc.Data["json"] = SucceedResp(0, LoginSucceed,
 			map[string]interface{}{
-				"uid":  uid,
-				"nick": nick,
+				"id":   uid,
+				"name": nick,
 			},
 			1)
 		_ = uc.ServeJSON()

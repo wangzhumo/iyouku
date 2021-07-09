@@ -31,6 +31,15 @@ type VideoDate struct {
 	IsEnd         int
 }
 
+type Episodes struct {
+	Id      int
+	Title   string
+	AddTime int64
+	Num     int
+	PlayUrl string
+	Comment string
+}
+
 func init() {
 	orm.RegisterModel(new(Video))
 }
@@ -114,4 +123,20 @@ func GetChannelVideoList(channelId int, typeId int, regionId int, end string, so
 	querySeter = querySeter.Limit(limit, offset)
 	_, err := querySeter.Values(&params, "id", "title", "sub_title", "add_time", "imgh", "imgv", "episodes_count", "is_end")
 	return count, params, err
+}
+
+// GetVideoInfo 通过videoId获取视频详情信息
+func GetVideoInfo(videoID int) (VideoDate, error) {
+	newOrm := orm.NewOrm()
+	var video VideoDate
+	err := newOrm.Raw("SELECT * FROM video where id =? ", videoID).QueryRow(&video)
+	return video, err
+}
+
+// GetVideoEpisodes 通过videoId获取视频剧集
+func GetVideoEpisodes(videoID int) (int64, []VideoDate, error) {
+	newOrm := orm.NewOrm()
+	var episodes []VideoDate
+	rows, err := newOrm.Raw("SELECT id, title, add_time, num, play_url, comment FROM video_episodes where video_id = ? AND status =1 ORDER BY num ASC;", videoID).QueryRows(&episodes)
+	return rows, episodes, err
 }

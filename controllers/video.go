@@ -146,3 +146,43 @@ func (vc *VideoController) ChannelVideoByParams() {
 		_ = vc.ServeJSON()
 	}
 }
+
+// GetVideoInfo 获取视频详情
+// @router /video/info [*]
+func (vc *VideoController) GetVideoInfo() {
+	videoId, _ := vc.GetInt("videoId")
+	// empty check
+	if videoId == 0 {
+		vc.Data["json"] = ErrorResp(4001, NoVideoID)
+		_ = vc.ServeJSON()
+	}
+
+	videoInfo, err := models.GetVideoInfo(videoId)
+	if err != nil {
+		vc.Data["json"] = ErrorResp(4004, ChannelVideoError)
+		_ = vc.ServeJSON()
+	} else {
+		vc.Data["json"] = SucceedResp(0, RequestOk, videoInfo, 1)
+		_ = vc.ServeJSON()
+	}
+}
+
+// GetVideoEpisode 获取视频剧集详情
+// @router /video/episode [get]
+func (vc *VideoController) GetVideoEpisode() {
+	videoId, _ := vc.GetInt("videoId")
+	// empty check
+	if videoId == 0 {
+		vc.Data["json"] = ErrorResp(4001, NoVideoID)
+		_ = vc.ServeJSON()
+	}
+
+	count, videoEpisodes, err := models.GetVideoEpisodes(videoId)
+	if err != nil {
+		vc.Data["json"] = ErrorResp(4004, VideoEpisodesError)
+		_ = vc.ServeJSON()
+	} else {
+		vc.Data["json"] = SucceedResp(0, RequestOk, videoEpisodes, count)
+		_ = vc.ServeJSON()
+	}
+}
