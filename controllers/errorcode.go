@@ -14,6 +14,7 @@ const RegisterFail = "注册失败"
 const LoginSucceed = "登录成功"
 const LoginFail = "登录失败"
 const RequireLogin = "需要登录"
+const RequireUids = "需要Uid"
 
 const NoChannelID = "需要指定频道ID"
 const NoRegionID = "需要指定RegionId"

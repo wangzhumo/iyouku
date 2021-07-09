@@ -146,9 +146,9 @@ func GetChannelTop(channelId int) (int64, []VideoDate, error) {
 	o := orm.NewOrm()
 	var videos []VideoDate
 
-	rows, err := o.Raw("SELECT d, title, sub_title, "+
+	rows, err := o.Raw("SELECT id, title, sub_title, "+
 		"channel_id, add_time, imgh, imgv ,episodes_count "+
-		"FROM video WHERE status=0 AND channel_id=?  "+
+		"FROM video WHERE status=1 AND channel_id=?  "+
 		"ORDER BY comment DESC LIMIT 10", channelId).QueryRows(&videos)
 	return rows, videos, err
 }
@@ -158,9 +158,9 @@ func GetTypeTop(typeId int) (int64, []VideoDate, error) {
 	o := orm.NewOrm()
 	var videos []VideoDate
 
-	rows, err := o.Raw("SELECT d, title, sub_title, "+
+	rows, err := o.Raw("SELECT id, title, sub_title, "+
 		"channel_id, add_time, imgh, imgv ,episodes_count "+
-		"FROM video WHERE status=0 AND type_id=?  "+
+		"FROM video WHERE status=1 AND type_id=?  "+
 		"ORDER BY comment DESC LIMIT 10", typeId).QueryRows(&videos)
 	return rows, videos, err
 }

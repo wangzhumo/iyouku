@@ -106,3 +106,26 @@ func (uc *UserController) Login() {
 		_ = uc.ServeJSON()
 	}
 }
+
+// SendPushMessage 发送推送消息
+// @router /send/message
+func (uc *UserController) SendPushMessage(){
+	// 评论内容
+	content := uc.GetString("content")
+	// 用户
+	uids := uc.GetString("uids")
+
+	// empty check
+	if len(content) == 0 {
+		uc.Data["json"] = ErrorResp(4001, NoContent)
+		_ = uc.ServeJSON()
+	}
+	if len(uids) == 0 {
+		uc.Data["json"] = ErrorResp(2001, RequireUids)
+		_ = uc.ServeJSON()
+	}
+
+	// 保存数据
+	// models.SaveComment(content)
+
+}
