@@ -148,7 +148,17 @@ redis
 
 ### 7.连接Redis
 
-```shell
+#### redis-cli
 
+```shell
+╭─wangzhumo at Wangzhumo in /usr/local/etc using 21-07-10 - 15:20:41
+╰─○ redis-cli -h 127.0.0.1 -p 6379
+127.0.0.1:6379>
 
 ```
+进入实例就可以进行操作了
+
+#### 客户端：
+> https://github.com/qishibo/AnotherRedisDesktopManager
+
+## End
