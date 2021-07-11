@@ -70,7 +70,7 @@ C:\Users\wangzhumo>docker run -p 6100:6100 --name redis -v C:\Develop\Docker\red
 a2cf524a3c7d156c78126131d93f64c496889f347cab80f5b8aa23cd4e1aaded
 
 ```
-- -p 6100:6100          指定端口
+- -p 6100:6100          指定端口,映射外部
 - --name redis          指定启动后的名字
 - -v {localPath}:{dockerPath}  建立映射关系
 - -d redis:6.2.4        指定启动的镜像(这里指定了6.2.4版本)
