@@ -9,7 +9,7 @@ import (
 // PoolConnect 获取Redis的链接
 func PoolConnect() redis.Conn {
 	s, _ := beego.AppConfig.String("redispsd")
-	host, _ := beego.AppConfig.String("redisdp")
+	host, _ := beego.AppConfig.String("redisdb")
 	redisPsd := redis.DialPassword(s)
 
 	redisPool := &redis.Pool{
@@ -18,7 +18,15 @@ func PoolConnect() redis.Conn {
 		IdleTimeout: 100 * time.Second,
 		Wait:        true,
 		Dial: func() (redis.Conn, error) {
-			return redis.Dial("tcp", host, redisPsd)
+			dial, err := redis.Dial("tcp", host, redisPsd)
+			if err != nil {
+				return dial, err
+			}
+			//if _,err := dial.Do("AUTH",redisPsd); err != nil {
+			//	dial.Close()
+			//	return nil, err
+			//}
+			return dial, err
 		},
 	}
 	return redisPool.Get()
