@@ -60,7 +60,7 @@ func (cc *CommentController) GetCommentList() {
 			commentInfo.Stamp = comment.Stamp
 
 			// 获取用户信息
-			commentInfo.UserInfo, _ = models.GetUserInfo(int64(comment.UserId))
+			commentInfo.UserInfo, _ = models.GetCacheUserInfo(int64(comment.UserId))
 			commentInfos = append(commentInfos, commentInfo)
 		}
 		cc.Data["json"] = SucceedResp(0, RequestOk, commentInfos, count)
