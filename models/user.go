@@ -2,7 +2,10 @@ package models
 
 import (
 	"com.wangzhumo.iyouku/common"
+	redisClient "com.wangzhumo.iyouku/services/redis"
 	"github.com/beego/beego/v2/client/orm"
+	"github.com/gomodule/redigo/redis"
+	"strconv"
 	"time"
 )
 
@@ -96,5 +99,30 @@ func GetUserInfo(userId int64) (UserInfo, error) {
 	var user UserInfo
 	err := o.Raw("SELECT id,name,add_time,avatar "+
 		"FROM user WHERE id=? LIMIT 1", userId).QueryRow(&user)
+	return user, err
+}
+
+// GetCacheUserInfo 获取用户数据
+func GetCacheUserInfo(userId int64) (userInfo UserInfo, err error) {
+	var user UserInfo
+	// 连接redis
+	conn := redisClient.PoolConnect()
+	defer conn.Close()
+	// 通过key获取视频信息
+	userRedisKey := "video:id:" + strconv.FormatInt(userId, 10)
+	exists, err := redis.Bool(conn.Do("exists", userRedisKey))
+	if exists {
+		// 存在就直接获取，而不是数据库查询
+		values, _ := redis.Values(conn.Do("hgetall", userRedisKey))
+		err = redis.ScanStruct(values, &user)
+	} else {
+		user, err = GetUserInfo(userId)
+		if err == nil {
+			_, err := conn.Do("hmset", redis.Args{userRedisKey}.AddFlat(user)...)
+			if err == nil {
+				conn.Do("expire", userRedisKey, 86400)
+			}
+		}
+	}
 	return user, err
 }

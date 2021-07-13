@@ -1,6 +1,13 @@
 package models
 
-import "github.com/beego/beego/v2/client/orm"
+import (
+	redisClient "com.wangzhumo.iyouku/services/redis"
+	"encoding/json"
+	"fmt"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/gomodule/redigo/redis"
+	"strconv"
+)
 
 type Video struct {
 	Id            int
@@ -133,10 +140,88 @@ func GetVideoInfo(videoID int) (VideoDate, error) {
 	return video, err
 }
 
-// GetVideoEpisodes 通过videoId获取视频剧集
-func GetVideoEpisodes(videoID int) (int64, []VideoDate, error) {
+// GetCacheVideoInfo 通过videoId获取视频详情信息 - Redis获取
+func GetCacheVideoInfo(videoID int) (videoInfo VideoDate, err error) {
+	// 获取视频
+	var video VideoDate
+	// 获取video连接
+	connect := redisClient.PoolConnect()
+	// 异常关闭
+	defer connect.Close()
+	// 通过key获取视频信息
+	videoRedisKey := "video:id:" + strconv.Itoa(videoID)
+
+	// 判断是否存在
+	videoExists, err := redis.Bool(connect.Do("exists", videoRedisKey))
+	if videoExists {
+		values, _ := redis.Values(connect.Do("hgetall", videoRedisKey))
+		// 如果没问题，就直接发出去，否则查数据
+		err = redis.ScanStruct(values, &video)
+		fmt.Println("redis video = ", video)
+	} else {
+		video, err = GetVideoInfo(videoID)
+		if err == nil {
+			// 把数据存入redis
+			_, err := connect.Do("hmset", redis.Args{videoRedisKey}.AddFlat(video)...)
+			if err == nil {
+				// 这是一个约定，存入的时候，记得设置过期时间
+				connect.Do("expire", videoRedisKey, 86400)
+			}
+		}
+		fmt.Println("mysql video = ", video)
+	}
+	return video, err
+}
+
+// GetCacheVideoEpisodes 通过videoId获取视频剧集
+func GetCacheVideoEpisodes(videoID int) (int64, []Episodes, error) {
+	// 获取视频
+	var (
+		err      error
+		episodes []Episodes
+		len      int64
+	)
+
+	// 获取video连接
+	connect := redisClient.PoolConnect()
+	// 异常关闭
+	defer connect.Close()
+	// 通过key获取视频信息
+	videoRedisKey := "video:episodes:id:" + strconv.Itoa(videoID)
+
+	// 判断是否存在
+	videoExists, err := redis.Bool(connect.Do("exists", videoRedisKey))
+	if videoExists {
+		len, err = redis.Int64(connect.Do("llen", videoRedisKey))
+		if err == nil {
+			values, _ := redis.Values(connect.Do("lrange", videoRedisKey, "0", "-1"))
+			var episodesInfo Episodes
+			for _, value := range values {
+				err := json.Unmarshal(value.([]byte), &episodesInfo)
+				if err == nil {
+					episodes = append(episodes, episodesInfo)
+				}
+			}
+		}
+	} else {
+		len, episodes, err = GetVideoEpisodes(videoID)
+		if err == nil {
+			for _, episode := range episodes {
+				episodeJson, err := json.Marshal(episode)
+				if err == nil {
+					connect.Do("rpush", videoRedisKey, episodeJson)
+				}
+			}
+			connect.Do("expire", videoRedisKey, 86400)
+		}
+	}
+	return len, episodes, err
+}
+
+// GetVideoEpisodes 通过videoId获取视频剧集 - redis 缓存
+func GetVideoEpisodes(videoID int) (int64, []Episodes, error) {
 	newOrm := orm.NewOrm()
-	var episodes []VideoDate
+	var episodes []Episodes
 	rows, err := newOrm.Raw("SELECT id, title, add_time, num, play_url, comment FROM video_episodes where video_id = ? AND status =1 ORDER BY num ASC;", videoID).QueryRows(&episodes)
 	return rows, episodes, err
 }

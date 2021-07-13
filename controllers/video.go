@@ -157,7 +157,7 @@ func (vc *VideoController) GetVideoInfo() {
 		_ = vc.ServeJSON()
 	}
 
-	videoInfo, err := models.GetVideoInfo(videoId)
+	videoInfo, err := models.GetCacheVideoInfo(videoId)
 	if err != nil {
 		vc.Data["json"] = ErrorResp(4004, ChannelVideoError)
 		_ = vc.ServeJSON()
@@ -177,7 +177,7 @@ func (vc *VideoController) GetVideoEpisode() {
 		_ = vc.ServeJSON()
 	}
 
-	count, videoEpisodes, err := models.GetVideoEpisodes(videoId)
+	count, videoEpisodes, err := models.GetCacheVideoEpisodes(videoId)
 	if err != nil {
 		vc.Data["json"] = ErrorResp(4004, VideoEpisodesError)
 		_ = vc.ServeJSON()
