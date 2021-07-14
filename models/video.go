@@ -24,7 +24,7 @@ type Video struct {
 	TypeId        int
 	Sort          int
 	EpisodesTime  int
-	Comment       string
+	Comment       int
 }
 
 type VideoDate struct {
@@ -36,6 +36,7 @@ type VideoDate struct {
 	Imgv          string
 	EpisodesCount int
 	IsEnd         int
+	Comment       int
 }
 
 type Episodes struct {
@@ -133,17 +134,17 @@ func GetChannelVideoList(channelId int, typeId int, regionId int, end string, so
 }
 
 // GetVideoInfo 通过videoId获取视频详情信息
-func GetVideoInfo(videoID int) (VideoDate, error) {
+func GetVideoInfo(videoID int) (Video, error) {
 	newOrm := orm.NewOrm()
-	var video VideoDate
+	var video Video
 	err := newOrm.Raw("SELECT * FROM video where id =? ", videoID).QueryRow(&video)
 	return video, err
 }
 
 // GetCacheVideoInfo 通过videoId获取视频详情信息 - Redis获取
-func GetCacheVideoInfo(videoID int) (videoInfo VideoDate, err error) {
+func GetCacheVideoInfo(videoID int) (videoInfo Video, err error) {
 	// 获取视频
-	var video VideoDate
+	var video Video
 	// 获取video连接
 	connect := redisClient.PoolConnect()
 	// 异常关闭
@@ -232,10 +233,119 @@ func GetChannelTop(channelId int) (int64, []VideoDate, error) {
 	var videos []VideoDate
 
 	rows, err := o.Raw("SELECT id, title, sub_title, "+
-		"channel_id, add_time, imgh, imgv ,episodes_count "+
+		"channel_id, add_time, imgh, imgv ,episodes_count ,comment "+
 		"FROM video WHERE status=1 AND channel_id=?  "+
 		"ORDER BY comment DESC LIMIT 10", channelId).QueryRows(&videos)
 	return rows, videos, err
+}
+
+// GetCacheChannelTop 通过channelId获取视频的排行
+func GetCacheChannelTop(channelId int) (int64, []VideoDate, error) {
+	var (
+		rows []VideoDate
+		num  int64
+		err  error
+	)
+	// redis
+	conn := redisClient.PoolConnect()
+	defer conn.Close()
+	// key
+	channelIdKey := "video:top:channel:channelId:" + strconv.Itoa(channelId)
+	// 获取数据
+	exists, err := redis.Bool(conn.Do("exists", channelIdKey))
+	if exists {
+		// zrevrange ->  // id value
+		values, _ := redis.Values(conn.Do("zrevrange", channelIdKey, "0", "10", "WITHSCORES"))
+		for index, value := range values {
+			// 这一个是ID,否则是comment的数据 - score
+			if index%2 == 0 {
+				videoId, err := strconv.Atoi(string(value.([]byte)))
+				videoInfo, err := GetCacheVideoInfo(videoId)
+				if err == nil {
+					// 转换数据
+					var videoDataInfo VideoDate
+					videoDataInfo.Id = videoInfo.Id
+					videoDataInfo.Title = videoInfo.Title
+					videoDataInfo.SubTitle = videoInfo.SubTitle
+					videoDataInfo.AddTime = videoInfo.AddTime
+					videoDataInfo.Imgh = videoInfo.Imgh
+					videoDataInfo.Imgv = videoInfo.Imgv
+					videoDataInfo.EpisodesCount = videoInfo.EpisodesCount
+					videoDataInfo.IsEnd = videoInfo.IsEnd
+					videoDataInfo.Comment = videoInfo.Comment
+
+					rows = append(rows, videoDataInfo)
+					num++
+				}
+			}
+		}
+
+	} else {
+		// mysql
+		num, rows, err = GetChannelTop(channelId)
+		if err == nil {
+			// 存入redis
+			for _, videoDate := range rows {
+				conn.Do("zadd", channelIdKey, videoDate.Comment, videoDate.Id)
+			}
+			conn.Do("expire", channelIdKey, 30*86400)
+		}
+	}
+
+	return num, rows, err
+}
+
+// GetCacheTypeTop 通过typeId获取视频的排行
+func GetCacheTypeTop(typeId int) (int64, []VideoDate, error) {
+	var (
+		rows []VideoDate
+		num  int64
+		err  error
+	)
+	// 连接、关闭
+	conn := redisClient.PoolConnect()
+	defer conn.Close()
+
+	// 是否存在
+	typeIdKey := "video:top:type:typeId:" + strconv.Itoa(typeId)
+	exists, err := redis.Bool(conn.Do("exists", typeIdKey))
+	if exists {
+		// 如果存在
+		values, _ := redis.Values(conn.Do("zrevrange", typeIdKey, "0", "10", "WITHSCORES"))
+		for index, value := range values {
+			if index%2 == 0 {
+				videoId, err := strconv.Atoi(string(value.([]byte)))
+				videoInfo, err := GetCacheVideoInfo(videoId)
+				if err == nil {
+					// 转换数据
+					var videoDataInfo VideoDate
+					videoDataInfo.Id = videoInfo.Id
+					videoDataInfo.Title = videoInfo.Title
+					videoDataInfo.SubTitle = videoInfo.SubTitle
+					videoDataInfo.AddTime = videoInfo.AddTime
+					videoDataInfo.Imgh = videoInfo.Imgh
+					videoDataInfo.Imgv = videoInfo.Imgv
+					videoDataInfo.EpisodesCount = videoInfo.EpisodesCount
+					videoDataInfo.IsEnd = videoInfo.IsEnd
+					videoDataInfo.Comment = videoInfo.Comment
+
+					rows = append(rows, videoDataInfo)
+					num++
+				}
+			}
+		}
+	} else {
+		// mysql
+		num, rows, err = GetTypeTop(typeId)
+		if err == nil {
+			// 存入redis
+			for _, videoDate := range rows {
+				conn.Do("zadd", typeIdKey, videoDate.Comment, videoDate.Id)
+			}
+			conn.Do("expire", typeIdKey, 30*86400)
+		}
+	}
+	return num, rows, err
 }
 
 // GetTypeTop 通过typeId获取视频的排行
@@ -244,7 +354,7 @@ func GetTypeTop(typeId int) (int64, []VideoDate, error) {
 	var videos []VideoDate
 
 	rows, err := o.Raw("SELECT id, title, sub_title, "+
-		"channel_id, add_time, imgh, imgv ,episodes_count "+
+		"channel_id, add_time, imgh, imgv ,episodes_count ,comment "+
 		"FROM video WHERE status=1 AND type_id=?  "+
 		"ORDER BY comment DESC LIMIT 10", typeId).QueryRows(&videos)
 	return rows, videos, err

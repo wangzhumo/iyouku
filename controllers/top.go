@@ -21,17 +21,15 @@ func (tc *TopController) GetChannelTop() {
 	}
 
 	// 获取channelId下的排行榜
-	count, dates, err := models.GetChannelTop(channelId)
+	count, dates, err := models.GetCacheChannelTop(channelId)
 	if err == nil {
-		tc.Data["json"] = SucceedResp(0,RequestOk,dates,count)
+		tc.Data["json"] = SucceedResp(0, RequestOk, dates, count)
 		_ = tc.ServeJSON()
-	}else{
-		tc.Data["json"] = ErrorResp(4005,ChannelTopError)
+	} else {
+		tc.Data["json"] = ErrorResp(4005, ChannelTopError)
 		_ = tc.ServeJSON()
 	}
 }
-
-
 
 // GetChannelType 根据Type获取排行榜
 // @router /type/top [get]
@@ -45,12 +43,12 @@ func (tc *TopController) GetChannelType() {
 	}
 
 	// 获取channelId下的排行榜
-	count, dates, err := models.GetTypeTop(typeId)
+	count, dates, err := models.GetCacheTypeTop(typeId)
 	if err == nil {
-		tc.Data["json"] = SucceedResp(0,RequestOk,dates,count)
+		tc.Data["json"] = SucceedResp(0, RequestOk, dates, count)
 		_ = tc.ServeJSON()
-	}else{
-		tc.Data["json"] = ErrorResp(4005,TypeTopError)
+	} else {
+		tc.Data["json"] = ErrorResp(4005, TypeTopError)
 		_ = tc.ServeJSON()
 	}
 }
