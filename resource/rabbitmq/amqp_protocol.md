@@ -113,6 +113,29 @@ eg: 列举几个Routing Key
 
 
 
+## 死信队列
+
+DLX，`dead-letter-exchange`
+
+利用：当消息在一个队列中变成死信 `(dead message)` 后，会被重新发送到另一个交换机，这个Exchange就是DLX
+
+![rabbitmq_die_task](../images/rabbitmq_die_task.png)
+
+绿色的是交换机，红色队列
+
+### 应用场景：
+
+- 超时
+
+- 定时任务
+
+### 产生：
+
+- 消息被拒绝(`basic.reject / basic.nack`)，并且未设置重回队列(`requeue = false`)
+- 重新投递到了最大次数
+- 消息`TTL`(`time to live`)过期
+- 队列达到最大长度(`x-max-length`)
+
 
 
 

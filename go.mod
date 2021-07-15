@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/beego/beego/v2 v2.0.1
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/gomodule/redigo v2.0.0+incompatible // indirect
-	github.com/streadway/amqp v1.0.0 // indirect
+	github.com/gomodule/redigo v2.0.0+incompatible
+	github.com/streadway/amqp v1.0.0
 	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
 )
