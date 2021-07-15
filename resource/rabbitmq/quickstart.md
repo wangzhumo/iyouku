@@ -60,5 +60,147 @@
 
   
 
+## 安装
 
+> [Downloading and Installing RabbitMQ — RabbitMQ](https://www.rabbitmq.com/download.html)
+
+```shell
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+
+# -p 5672:5672	   RabbitMQ 连接端口
+# -p 15672:15672   这个是管理控制台端口
+
+╭─wangzhumo at Wangzhumo in /Applications/Docker.app/Contents using 21-07-15 - 14:16:40
+╰─○ docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+Unable to find image 'rabbitmq:3-management' locally
+3-management: Pulling from library/rabbitmq
+a31c7b29f4ad: Pull complete
+0ea5da5fa011: Pull complete
+2d9925bd5669: Pull complete
+56f5b6dce95d: Pull complete
+ae74659cb465: Pull complete
+e20048198e4f: Pull complete
+9b824a4a94bf: Pull complete
+a708661d5d9a: Pull complete
+dba4fca7ba03: Pull complete
+Digest: sha256:7f0fe23cf3a859298adacebec85c23a1127c1a0515220ed126dae61379096936
+Status: Downloaded newer image for rabbitmq:3-management
+```
+
+等待第一次下载完成，就会直接开始运行
+
+```shell
+Starting RabbitMQ 3.8.19 on Erlang 24.0.3 [jit]
+ Copyright (c) 2007-2021 VMware, Inc. or its affiliates.
+ Licensed under the MPL 2.0. Website: https://rabbitmq.com
+
+  ##  ##      RabbitMQ 3.8.19
+  ##  ##
+  ##########  Copyright (c) 2007-2021 VMware, Inc. or its affiliates.
+  ######  ##
+  ##########  Licensed under the MPL 2.0. Website: https://rabbitmq.com
+
+  Erlang:      24.0.3 [jit]
+  TLS Library: OpenSSL - OpenSSL 1.1.1k  25 Mar 2021
+
+  Doc guides:  https://rabbitmq.com/documentation.html
+  Support:     https://rabbitmq.com/contact.html
+  Tutorials:   https://rabbitmq.com/getstarted.html
+  Monitoring:  https://rabbitmq.com/monitoring.html
+
+  Logs: <stdout>
+
+  Config file(s): /etc/rabbitmq/rabbitmq.conf
+
+  Starting broker...2021-07-15 06:24:15.428 [info] <0.273.0>
+ node           : rabbit@2930c41a60ea
+ home dir       : /var/lib/rabbitmq
+ config file(s) : /etc/rabbitmq/rabbitmq.conf
+ cookie hash    : vVmyiI/oawcjtRgBCA1RUw==
+ log(s)         : <stdout>
+ database dir   : /var/lib/rabbitmq/mnesia/rabbit@2930c41a60ea
+```
+
+其中说明了
+
+版本：RabbitMQ 3.8.19 on Erlang 24.0.3
+Config: Config file(s): /etc/rabbitmq/rabbitmq.conf
+
+以及其他一些启动后的配置说明.
+
+
+
+## 启动管理器
+
+> http://127.0.0.1:15672/
+
+### 新建Exchange
+
+|              |                                                              |
+| -----------: | ------------------------------------------------------------ |
+|        Name: | *                                                            |
+|        Type: | direct                    fanout                    headers                    topic |
+|  Durability: | Durable(持久化)          Transient                           |
+| Auto delete: | No          Yes                                              |
+|    Internal: | No          Yes                                              |
+|   Arguments: |                                                              |
+
+- name     新建交换机的名字
+- Type      交换机的类型
+- Durability    是否需要持久化
+- Auto delete   是否在无人绑定的情况下，关闭这个交换机
+
+### 新建Queue
+
+|              |                                    |
+| -----------: | ---------------------------------- |
+|        Type: | Classic                     Quorum |
+|        Name: | *                                  |
+|  Durability: | Durable          Transient         |
+| Auto delete: | No          Yes                    |
+
+和Exchange的参数一样的意思
+
+
+
+### Exchange绑定Queue
+
+| 											 | 		  |
+| :--------------------- | ---- |
+| To queue             : | *    |
+| Routing key:           |      |
+
+写入Queue地址，填写Routing Key
+
+
+
+## 命令行工具
+
+1.没有端口的情况下
+
+2.需要统一配置的时候
+
+- List         查看
+- purge     清空
+- Delete    删除
+
+### Status
+
+- Connection   `rabbitmqctl list_connection`
+- Consumers   `rabbitmqctl list_consumers`
+- Exchange   `rabbitmqctl list_exchanges`  
+
+### User
+
+- 新建  `rabbitmqctl add_user`
+- 修改密码  `rabbitmqctl change_password`
+- 删除用户  `rabbitmqctl delete_user`
+- 查看  `rabbitmqctl list_users`
+- 角色  `rabbitmqctl set_user_tags`
+
+### App
+
+- 启动  `rabbitmqctl start_app`
+- 关闭(除Erlang)  `rabbitmqctl stop_app`
+- 关闭  `rabbitmqctl stop`
 
