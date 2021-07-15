@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "com.wangzhumo.iyouku/routers"
-	rabbitmqClient "com.wangzhumo.iyouku/services/rabbitmq"
 	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	beego "github.com/beego/beego/v2/server/web"
@@ -29,5 +28,4 @@ func main() {
 	}
 
 	beego.Run()
-	rabbitmqClient.RunRabbitMQ()
 }

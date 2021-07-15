@@ -1,6 +1,9 @@
 package models
 
 import (
+	"com.wangzhumo.iyouku/common"
+	rabbitmqClient "com.wangzhumo.iyouku/services/rabbitmq"
+	"encoding/json"
 	"github.com/beego/beego/v2/client/orm"
 	"time"
 )
@@ -9,7 +12,7 @@ type Comment struct {
 	Id           int
 	Content      string
 	AddTime      int64
-	AddTimeTitle string  `orm:"-"`
+	AddTimeTitle string `orm:"-"`
 	UserId       int
 	Stamp        int
 	Status       int
@@ -45,13 +48,13 @@ func SaveComment(context string, userId int, episodesId int, videoId int) (err e
 	newOrm := orm.NewOrm()
 	unixTime := time.Now().Unix()
 	var comment = Comment{
-		Content:      context,
-		UserId:       userId,
-		EpisodesId:   episodesId,
-		VideoId:      videoId,
-		Stamp:        0,
-		Status:       1,
-		AddTime:      unixTime}
+		Content:    context,
+		UserId:     userId,
+		EpisodesId: episodesId,
+		VideoId:    videoId,
+		Stamp:      0,
+		Status:     1,
+		AddTime:    unixTime}
 
 	_, err = newOrm.Insert(&comment)
 
@@ -60,6 +63,13 @@ func SaveComment(context string, userId int, episodesId int, videoId int) (err e
 		newOrm.Raw("UPDATE video SET comment=comment+1 WHERE id=?", videoId)
 		// 修改剧集评论数
 		newOrm.Raw("UPDATE video_episodes SET comment=comment+1 WHERE id=?", videoId)
+		// 更新Redis - 通过MQ来实现(简单模式下传递)
+		videoObj := map[string]int{
+			"VideoId": videoId,
+		}
+		marshal, _ := json.Marshal(videoObj)
+		// 发送给mq
+		_ = rabbitmqClient.Publish("", common.TopQueue, string(marshal))
 	}
 	return
 }

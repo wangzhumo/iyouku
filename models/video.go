@@ -158,7 +158,6 @@ func GetCacheVideoInfo(videoID int) (videoInfo Video, err error) {
 		values, _ := redis.Values(connect.Do("hgetall", videoRedisKey))
 		// 如果没问题，就直接发出去，否则查数据
 		err = redis.ScanStruct(values, &video)
-		fmt.Println("redis video = ", video)
 	} else {
 		video, err = GetVideoInfo(videoID)
 		if err == nil {
@@ -169,7 +168,6 @@ func GetCacheVideoInfo(videoID int) (videoInfo Video, err error) {
 				connect.Do("expire", videoRedisKey, 86400)
 			}
 		}
-		fmt.Println("mysql video = ", video)
 	}
 	return video, err
 }
@@ -313,6 +311,7 @@ func GetCacheTypeTop(typeId int) (int64, []VideoDate, error) {
 		// 如果存在
 		values, _ := redis.Values(conn.Do("zrevrange", typeIdKey, "0", "10", "WITHSCORES"))
 		for index, value := range values {
+			fmt.Println(string(value.([]byte)))
 			if index%2 == 0 {
 				videoId, err := strconv.Atoi(string(value.([]byte)))
 				videoInfo, err := GetCacheVideoInfo(videoId)
