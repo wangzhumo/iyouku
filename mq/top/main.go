@@ -54,7 +54,8 @@ func callback(msg string) {
 
 		// 需要更新两个排行榜
 		redisChannelKey := "video:top:channel:channelId:" + strconv.Itoa(videoInfo.ChannelId)
-		redisTypeKey := "video:top:channel:typeId:" + strconv.Itoa(videoInfo.ChannelId)
+		redisTypeKey := "video:top:type:typeId:" + strconv.Itoa(videoInfo.TypeId)
+		redisVideoKey := "video:id:" + strconv.Itoa(videoInfo.Id)
 
 		// 直接更新即可
 		// ZINCRBY key increment member
@@ -63,6 +64,10 @@ func callback(msg string) {
 		connect.Do("zincrby", redisChannelKey, 1, data.VideoId)
 		// 就是说让redisChannelKey这个key中 videoID 这个成员 减去 1
 		connect.Do("zincrby", redisTypeKey, 1, data.VideoId)
+		_, err := connect.Do("hincrby", redisVideoKey, "Comment", 1)
+		if err != nil {
+			return
+		}
 	}
 
 }
