@@ -133,7 +133,8 @@ func (uc *UserController) SendPushMessage() {
 		if len(splitUid) > 0 {
 			for _, uid := range splitUid {
 				userId, _ := strconv.Atoi(uid)
-				_, _ = models.SendMessageToUser(messageId, userId)
+				//_, _ = models.SendMessageToUser(messageId, userId)
+				models.SendMQMessageToUser(messageId, userId)
 			}
 			uc.Data["json"] = SucceedResp(0, RequestOk, nil, 1)
 			_ = uc.ServeJSON()

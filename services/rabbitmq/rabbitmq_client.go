@@ -247,7 +247,7 @@ func ConsumerExchange(exchange string, types string, routingKey string, queueNam
 }
 
 // ConsumerDlx 死信队列，常用于定时
-func ConsumerDlx(exchangeA string, qAName string, exchangeB string, qBName string, ttl int, callback MQCallback) {
+func ConsumerDlx(exchangeName string, queueName string, exchangeDlxName string, queueDlxName string, ttl int, callback MQCallback) {
 	// 连接
 	conn, err := ConnectMq()
 	defer conn.Close()
@@ -264,7 +264,7 @@ func ConsumerDlx(exchangeA string, qAName string, exchangeB string, qBName strin
 
 	//创建A exchange
 	err = channel.ExchangeDeclare(
-		exchangeA,
+		exchangeName,
 		"fanout",
 		true,
 		false,
@@ -278,25 +278,25 @@ func ConsumerDlx(exchangeA string, qAName string, exchangeB string, qBName strin
 	//2.设置死信交换机  x-dead-letter-exchange
 	//"x-dead-letter-routing-key":"",
 	//"x-dead-letter-queue":""
-	queueA, err := channel.QueueDeclare(
-		qAName,
+	queueNormal, err := channel.QueueDeclare(
+		queueName,
 		true,
 		false,
 		true,
 		false,
 		amqp.Table{
 			"x-message-ttl":          ttl,
-			"x-dead-letter-exchange": exchangeB,
+			"x-dead-letter-exchange": exchangeDlxName,
 		},
 	)
 	if err != nil {
 		return
 	}
 
-	//绑定 exchangeA   queueA
+	//绑定 exchange   queueNormal
 	err = channel.QueueBind(
-		queueA.Name, "",
-		exchangeA,
+		queueNormal.Name, "",
+		exchangeName,
 		false, nil)
 	if err != nil {
 		return
@@ -305,7 +305,7 @@ func ConsumerDlx(exchangeA string, qAName string, exchangeB string, qBName strin
 	// 重复以上步骤
 	//创建B exchange
 	err = channel.ExchangeDeclare(
-		exchangeB,
+		exchangeDlxName,
 		"fanout",
 		true,
 		false,
@@ -315,8 +315,8 @@ func ConsumerDlx(exchangeA string, qAName string, exchangeB string, qBName strin
 	)
 
 	//创建B queue - 这里的队列是一个正常的队列，只是消费A转发过来的消息
-	queueB, err := channel.QueueDeclare(
-		qBName,
+	queueDlx, err := channel.QueueDeclare(
+		queueDlxName,
 		true,
 		false,
 		true,
@@ -327,17 +327,17 @@ func ConsumerDlx(exchangeA string, qAName string, exchangeB string, qBName strin
 		return
 	}
 
-	//绑定 exchangeA   queueA
+	//绑定 exchange   queueA
 	err = channel.QueueBind(
-		queueB.Name, "",
-		exchangeB,
+		queueDlx.Name, "",
+		exchangeDlxName,
 		false, nil)
 	if err != nil {
 		return
 	}
 
 	// 接受消息
-	messages, err := channel.Consume(queueB.Name, "",
+	messages, err := channel.Consume(queueDlx.Name, "",
 		false, false,
 		false, false, nil)
 	if err != nil {
@@ -351,7 +351,7 @@ func ConsumerDlx(exchangeA string, qAName string, exchangeB string, qBName strin
 			msg := BytesToString(&(message.Body))
 			callback(*msg)
 			// 回执
-			message.Ack(false)
+			_ = message.Ack(false)
 		}
 	}()
 	<-forever
