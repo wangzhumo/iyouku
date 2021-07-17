@@ -67,18 +67,18 @@ Analyzer: `ik_smart` , `ik_max_word` , Tokenizer: `ik_smart` , `ik_max_word`
 ```shell
 # 下载镜像，这里指定需要下载7.13.3版本
 ╭─wangzhumo at Wangzhumo in ~ using 21-07-17 - 18:01:14
-╰─○ docker pull elasticsearch:7.13.3
+╰─○ docker pull elasticsearch:7.13.2
 7.13.3: Pulling from library/elasticsearch
 Digest: sha256:759533051d0d5c67f7b09c8655ea00af3a8f15f98e2df4ea76ff2b47967488a5
-Status: Image is up to date for elasticsearch:7.13.3
-docker.io/library/elasticsearch:7.13.3
+Status: Image is up to date for elasticsearch:7.13.2
+docker.io/library/elasticsearch:7.13.2
 
 # 查看镜像
 ╭─wangzhumo at Wangzhumo in ~ using 21-07-17 - 18:01:55
 ╰─○ docker images
 REPOSITORY      TAG            IMAGE ID       CREATED       SIZE
 rabbitmq        3-management   85e83aca5d60   3 days ago    249MB
-elasticsearch   7.13.3         84840c8322fe   2 weeks ago   1.02GB
+elasticsearch   7.13.2         84840c8322fe   2 weeks ago   1.02GB
 redis           6.2            08502081bff6   3 weeks ago   105MB
 mysql           5.7.34         09361feeb475   3 weeks ago   447MB
 
@@ -93,7 +93,7 @@ mysql           5.7.34         09361feeb475   3 weeks ago   447MB
 # 启动 elasticsearch
 
 ╭─wangzhumo at Wangzhumo in ~ using 21-07-17 - 17:59:01
-╰─○ docker run -itd --name es -p 9300:9300 -p 9200:9200 -e "discovery.type=single-node" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" elasticsearch:7.13.3
+╰─○ docker run -itd --name es -p 9300:9300 -p 9200:9200 -e "http.cors.enabled=true" -e "http.cors.allow-origin=*" -e "discovery.type=single-node" -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" elasticsearch:7.13.2
 
 # 输出启动后的ID
 d9fd0e6986394a801ddc3daeada968421faeccdc89f9a61b8ec32ecca338f4fe
@@ -168,6 +168,80 @@ ls -l
 ```
 
 #### 2.安装
+
+```shell
+# 进入容器
+docker exec -it es /bin/bash
+
+# 在线安装
+./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.13.2/elasticsearch-analysis-ik-7.13.2.zip
+```
+如果在线安装不成功，可以尝试离线安装
+
+Windows
+```shell
+# 自行下载
+elasticsearch-analysis-ik-7.13.2.zip
+
+# 复制到docker容器中
+docker cp C:\Users\wangzhumo\Downloads\elasticsearch-analysis-ik-7.13.2.zip es:/usr/share/elasticsearch/plugins
+
+# 进入容器
+docker exec -it es /bin/bash
+# 创建ik目录
+mkdir /usr/share/elasticsearch/plugins/ik
+# 移动
+mv /usr/share/elasticsearch/plugins/elasticsearch-analysis-ik-7.13.2.zip /usr/share/elasticsearch/plugins/ik
+# 解压
+unzip elasticsearch-analysis-ik-7.13.2.zip
+# 最后移除
+rm -rf elasticsearch-analysis-ik-7.13.2.zip
+```
+
+以上操作完成后，记得重启
+```shell
+# restart
+docker restart es
+
+# status
+elasticsearch-plugin list
+
+C:\Users\wangzhumo>docker  exec -it es /bin/bash
+[root@770bcdebc42f elasticsearch]# elasticsearch-plugin list
+ik
+
+```
+
+## elasticsearch-head
+
+### 安装
+```shell
+# pull
+C:\Users\wangzhumo>docker pull mobz/elasticsearch-head:5-alpine
+5-alpine: Pulling from mobz/elasticsearch-head
+b7f33cc0b48e: Downloading
+9e0a04370e7e: Download complete
+11ec9355afda: Download complete
+f1cc684bde97: Download complete
+720ab54a8d63: Download complete
+5-alpine: Pulling from mobz/elasticsearch-head
+b7f33cc0b48e: Pull complete
+9e0a04370e7e: Pull complete
+11ec9355afda: Pull complete
+f1cc684bde97: Pull complete
+720ab54a8d63: Pull complete
+Digest: sha256:871f1c80635f7d215891bb55b0924b2b840b24a89b78fae4e68cf46dfd3cb947
+Status: Downloaded newer image for mobz/elasticsearch-head:5-alpine
+docker.io/mobz/elasticsearch-head:5-alpine
+
+C:\Users\wangzhumo>docker run -itd --name es-head --restart=always -p 9100:9100 mobz/elasticsearch-head:5-alpine
+2dff5228f998b9dbbf5ef3aef8c1d497ee9b4f941f22812891e5ffd1c786e226
+
+C:\Users\wangzhumo>docker ps -l
+CONTAINER ID   IMAGE                              COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+2dff5228f998   mobz/elasticsearch-head:5-alpine   "/bin/sh -c 'node_mo…"   2 minutes ago   Up 2 minutes   0.0.0.0:9100->9100/tcp, :::9100->9100/tcp   es-head
+
+```
 
 
 
