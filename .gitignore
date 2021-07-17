@@ -1,4 +1,5 @@
 .idea
-iyouku.exe
+*.exe
 iyouku
 lastupdate.tmp
+*.exe~

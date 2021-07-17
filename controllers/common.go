@@ -3,6 +3,7 @@ package controllers
 import (
 	"crypto/md5"
 	"encoding/hex"
+
 	beego "github.com/beego/beego/v2/server/web"
 )
 
@@ -10,7 +11,7 @@ import (
 type BaseResponse struct {
 	Code  int         `json:"code"`
 	Msg   interface{} `json:"msg"`
-	Items interface{} `json:"item"`
+	Items interface{} `json:"items"`
 	Count int64       `json:"count"`
 }
 
@@ -45,4 +46,3 @@ func Md5Psd(psd string) string {
 	h.Write([]byte(psd + s))
 	return hex.EncodeToString(h.Sum(nil))
 }
-

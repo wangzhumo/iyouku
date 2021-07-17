@@ -1,30 +1,31 @@
 package models
 
 import (
-	redisClient "com.wangzhumo.iyouku/services/redis"
 	"encoding/json"
-	"fmt"
+	"strconv"
+
+	redisClient "com.wangzhumo.iyouku/services/redis"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/gomodule/redigo/redis"
-	"strconv"
 )
 
 type Video struct {
-	Id            int
-	Title         string
-	SubTitle      string
-	AddTime       int64
-	Img           string
-	Img1          string
-	EpisodesCount int
-	IsEnd         int
-	ChannelId     int
-	Status        int
-	RegionId      int
-	TypeId        int
-	Sort          int
-	EpisodesTime  int
-	Comment       int
+	Id                 int
+	Title              string
+	SubTitle           string
+	AddTime            int64
+	Img                string
+	Img1               string
+	EpisodesCount      int
+	IsEnd              int
+	ChannelId          int
+	Status             int
+	RegionId           int
+	TypeId             int
+	EpisodesUpdateTime int
+	Comment            int
+	UserId             int
+	IsRecommend        int
 }
 
 type VideoDate struct {
@@ -61,9 +62,9 @@ func GetHotListByChannelID(channelId int) (int64, []VideoDate, error) {
 	newOrm := orm.NewOrm()
 	var videos []VideoDate
 	count, err := newOrm.Raw("SELECT id, title, sub_title, "+
-		"channel_id, add_time, imgh, imgv ,episodes_count,is_end "+
+		"channel_id, add_time, img, img1 ,episodes_count,is_end "+
 		"FROM video where is_hot = 1 AND status = 1 AND channel_id =? "+
-		"ORDER BY episodes_update DESC LIMIT 10", channelId).QueryRows(&videos)
+		"ORDER BY episodes_update_time DESC LIMIT 10", channelId).QueryRows(&videos)
 	return count, videos, err
 }
 
@@ -72,9 +73,9 @@ func GetRecommendByRegionID(regionId int, channelId int) (int64, []VideoDate, er
 	newOrm := orm.NewOrm()
 	var videos []VideoDate
 	count, err := newOrm.Raw("SELECT id, title, sub_title, "+
-		"channel_id, add_time, imgh, imgv ,episodes_count,is_end "+
+		"channel_id, add_time, img, img1 ,episodes_count,is_end "+
 		"FROM video where status = 1 AND is_recommend = 1 AND channel_id =? AND region_id =? "+
-		"ORDER BY episodes_update DESC LIMIT 10", channelId, regionId).QueryRows(&videos)
+		"ORDER BY episodes_update_time DESC LIMIT 10", channelId, regionId).QueryRows(&videos)
 	return count, videos, err
 }
 
@@ -83,9 +84,9 @@ func GetRecommendByTypeID(typeId int, channelId int) (int64, []VideoDate, error)
 	newOrm := orm.NewOrm()
 	var videos []VideoDate
 	count, err := newOrm.Raw("SELECT id, title, sub_title, "+
-		"channel_id, add_time, imgh, imgv ,episodes_count,is_end "+
+		"channel_id, add_time, img, img1 ,episodes_count,is_end "+
 		"FROM video where status = 1 AND is_recommend = 1 AND channel_id =? AND type_id =? "+
-		"ORDER BY episodes_update DESC LIMIT 10", channelId, typeId).QueryRows(&videos)
+		"ORDER BY episodes_update_time DESC LIMIT 10", channelId, typeId).QueryRows(&videos)
 	return count, videos, err
 }
 
@@ -115,7 +116,7 @@ func GetChannelVideoList(channelId int, typeId int, regionId int, end string, so
 	}
 
 	if sort == SortUpdateTime {
-		querySeter = querySeter.OrderBy("episodes_update")
+		querySeter = querySeter.OrderBy("episodes_update_time")
 	} else if sort == SortComment {
 		querySeter = querySeter.OrderBy("comment")
 	} else if sort == SortAddTime {
@@ -125,11 +126,11 @@ func GetChannelVideoList(channelId int, typeId int, regionId int, end string, so
 	}
 
 	// 获取总条数
-	count, _ := querySeter.Values(&params, "id", "title", "sub_title", "add_time", "imgh", "imgv", "episodes_count", "is_end")
+	count, _ := querySeter.Values(&params, "id", "title", "sub_title", "add_time", "img", "img1", "episodes_count", "is_end")
 
 	// 获取指定的Limit数据
 	querySeter = querySeter.Limit(limit, offset)
-	_, err := querySeter.Values(&params, "id", "title", "sub_title", "add_time", "imgh", "imgv", "episodes_count", "is_end")
+	_, err := querySeter.Values(&params, "id", "title", "sub_title", "add_time", "img", "img1", "episodes_count", "is_end")
 	return count, params, err
 }
 
@@ -231,7 +232,7 @@ func GetChannelTop(channelId int) (int64, []VideoDate, error) {
 	var videos []VideoDate
 
 	rows, err := o.Raw("SELECT id, title, sub_title, "+
-		"channel_id, add_time, imgh, imgv ,episodes_count ,comment "+
+		"channel_id, add_time, img, img1 ,episodes_count ,comment "+
 		"FROM video WHERE status=1 AND channel_id=?  "+
 		"ORDER BY comment DESC LIMIT 10", channelId).QueryRows(&videos)
 	return rows, videos, err
@@ -311,7 +312,6 @@ func GetCacheTypeTop(typeId int) (int64, []VideoDate, error) {
 		// 如果存在
 		values, _ := redis.Values(conn.Do("zrevrange", typeIdKey, "0", "10", "WITHSCORES"))
 		for index, value := range values {
-			fmt.Println(string(value.([]byte)))
 			if index%2 == 0 {
 				videoId, err := strconv.Atoi(string(value.([]byte)))
 				videoInfo, err := GetCacheVideoInfo(videoId)
@@ -353,7 +353,7 @@ func GetTypeTop(typeId int) (int64, []VideoDate, error) {
 	var videos []VideoDate
 
 	rows, err := o.Raw("SELECT id, title, sub_title, "+
-		"channel_id, add_time, imgh, imgv ,episodes_count ,comment "+
+		"channel_id, add_time, img, img1 ,episodes_count ,comment "+
 		"FROM video WHERE status=1 AND type_id=?  "+
 		"ORDER BY comment DESC LIMIT 10", typeId).QueryRows(&videos)
 	return rows, videos, err
