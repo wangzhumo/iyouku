@@ -86,3 +86,36 @@ docker exec -it 93729334f616 /bin/bash
 root@93729334f616:/# 
 ```
 
+
+
+## 删除
+
+### 容器
+
+这里用es来举例，因为版本太高ik无法安装，降级es
+
+```shell
+docker ps 
+
+# 先停止es
+docker stop d9fd0e698639
+
+# 删除
+docker rm d9fd0e698639
+```
+
+### 镜像
+
+```shell
+docker images
+
+REPOSITORY      TAG            IMAGE ID       CREATED       SIZE
+rabbitmq        3-management   85e83aca5d60   3 days ago    249MB
+elasticsearch   7.13.3         84840c8322fe   2 weeks ago   1.02GB
+redis           6.2            08502081bff6   3 weeks ago   105MB
+mysql           5.7.34         09361feeb475   3 weeks ago   447MB
+
+# 移除elasticsearch
+docker rmi 84840c8322fe
+```
+
