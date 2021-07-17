@@ -1,17 +1,17 @@
 package models
 
 import (
-	"com.wangzhumo.iyouku/common"
+	"strconv"
+	"time"
+
 	redisClient "com.wangzhumo.iyouku/services/redis"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/gomodule/redigo/redis"
-	"strconv"
-	"time"
 )
 
 // User self
 type User struct {
-	Id       int64
+	Id       int
 	Name     string
 	Password string
 	AddTime  int64
@@ -22,7 +22,7 @@ type User struct {
 
 // UserInfo normal user info
 type UserInfo struct {
-	Id      int64  `json:"id"`
+	Id      int    `json:"id"`
 	Name    string `json:"name"`
 	AddTime string `json:"addTime"`
 	Avatar  string `json:"avatar"`
@@ -63,14 +63,13 @@ func IsPhoneRegister(mobile string) (status bool) {
 func UserSave(mobile string, encodePsd string) (err error) {
 	// 获取orm
 	o := orm.NewOrm()
-	uid, _ := common.GenerateUid()
+	//uid, _ := common.GenerateUid()
 	user := User{
 		Mobile:   mobile,
 		Password: encodePsd,
 		Status:   1,
 		Name:     "",
 		AddTime:  time.Now().Unix(),
-		Id:       uid,
 	}
 
 	// 存入数据库
@@ -79,7 +78,7 @@ func UserSave(mobile string, encodePsd string) (err error) {
 }
 
 // UserLogin 用户登录查询
-func UserLogin(mobile string, password string) (int64, string) {
+func UserLogin(mobile string, password string) (int, string) {
 	o := orm.NewOrm()
 	var user User
 	// 查询用户信息
@@ -94,7 +93,7 @@ func UserLogin(mobile string, password string) (int64, string) {
 }
 
 // GetUserInfo 查询用户信息（normal）
-func GetUserInfo(userId int64) (UserInfo, error) {
+func GetUserInfo(userId int) (UserInfo, error) {
 	o := orm.NewOrm()
 	var user UserInfo
 	err := o.Raw("SELECT id,name,add_time,avatar "+
@@ -103,13 +102,13 @@ func GetUserInfo(userId int64) (UserInfo, error) {
 }
 
 // GetCacheUserInfo 获取用户数据
-func GetCacheUserInfo(userId int64) (userInfo UserInfo, err error) {
+func GetCacheUserInfo(userId int) (userInfo UserInfo, err error) {
 	var user UserInfo
 	// 连接redis
 	conn := redisClient.PoolConnect()
 	defer conn.Close()
 	// 通过key获取视频信息
-	userRedisKey := "video:id:" + strconv.FormatInt(userId, 10)
+	userRedisKey := "video:id:" + strconv.Itoa(userId)
 	exists, err := redis.Bool(conn.Do("exists", userRedisKey))
 	if exists {
 		// 存在就直接获取，而不是数据库查询

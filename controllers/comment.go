@@ -60,7 +60,7 @@ func (cc *CommentController) GetCommentList() {
 			commentInfo.Stamp = comment.Stamp
 
 			// 获取用户信息
-			commentInfo.UserInfo, _ = models.GetCacheUserInfo(int64(comment.UserId))
+			commentInfo.UserInfo, _ = models.GetCacheUserInfo(comment.UserId)
 			commentInfos = append(commentInfos, commentInfo)
 		}
 		cc.Data["json"] = SucceedResp(0, RequestOk, commentInfos, count)
@@ -124,7 +124,7 @@ func (cc *CommentController) GetGoCommentList() {
 		}()
 
 		// 获取taskChan中的用户数据
-		userInfoMap := make(map[int64]models.UserInfo)
+		userInfoMap := make(map[int]models.UserInfo)
 
 		// channel在for循环中，有一个特性  当channel关闭时，会跳出这个循环
 		for c := range taskChan {
@@ -143,7 +143,7 @@ func (cc *CommentController) GetGoCommentList() {
 			commentInfo.Stamp = comment.Stamp
 
 			// 获取用户信息
-			commentInfo.UserInfo, _ = userInfoMap[int64(comment.UserId)]
+			commentInfo.UserInfo, _ = userInfoMap[comment.UserId]
 			commentInfos = append(commentInfos, commentInfo)
 		}
 
@@ -155,7 +155,7 @@ func (cc *CommentController) GetGoCommentList() {
 // Channel 获取用户信息
 func chanGetUserInfo(uidChan chan int, closeChan chan bool, taskChan chan models.UserInfo) {
 	for uid := range uidChan {
-		userInfo, err := models.GetCacheUserInfo(int64(uid))
+		userInfo, err := models.GetCacheUserInfo(uid)
 		// 发送回去
 		if err == nil {
 			taskChan <- userInfo

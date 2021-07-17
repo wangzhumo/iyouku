@@ -1,17 +1,18 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"runtime"
+	"strconv"
+
 	"com.wangzhumo.iyouku/common"
 	"com.wangzhumo.iyouku/models"
 	rabbitmqClient "com.wangzhumo.iyouku/services/rabbitmq"
 	redisClient "com.wangzhumo.iyouku/services/redis"
-	"encoding/json"
-	"fmt"
 	"github.com/beego/beego/v2/client/orm"
 	beego "github.com/beego/beego/v2/server/web"
 	_ "github.com/go-sql-driver/mysql"
-	"runtime"
-	"strconv"
 )
 
 func main() {

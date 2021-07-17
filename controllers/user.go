@@ -1,11 +1,12 @@
 package controllers
 
 import (
-	"com.wangzhumo.iyouku/models"
-	beego "github.com/beego/beego/v2/server/web"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"com.wangzhumo.iyouku/models"
+	beego "github.com/beego/beego/v2/server/web"
 )
 
 // UserController Operations about Users
@@ -104,6 +105,12 @@ func (uc *UserController) Login() {
 	}
 }
 
+// SendData 数据结构 - 给channel使用
+type SendData struct {
+	UserId    int
+	MessageId int64
+}
+
 // SendPushMessage 发送推送消息
 // @router /send/message [post]
 func (uc *UserController) SendPushMessage() {
@@ -130,15 +137,50 @@ func (uc *UserController) SendPushMessage() {
 	} else {
 		// 设置到指定的用户上去
 		splitUid := strings.Split(uids, ",")
-		if len(splitUid) > 0 {
+		// 使用协程来处理
+		length := len(splitUid)
+		// 创建sendData使用的channel
+		sendChan := make(chan SendData, length)
+		// 创建关闭的Channel
+		closeChan := make(chan bool, length)
+
+		// 发送UID 以及 MessageId 的消息
+		go func() {
+			var data SendData
 			for _, uid := range splitUid {
 				userId, _ := strconv.Atoi(uid)
-				//_, _ = models.SendMessageToUser(messageId, userId)
-				models.SendMQMessageToUser(messageId, userId)
+				data.UserId = userId
+				data.MessageId = messageId
+				// 发送出去
+				sendChan <- data
 			}
-			uc.Data["json"] = SucceedResp(0, RequestOk, nil, 1)
-			_ = uc.ServeJSON()
+			close(sendChan)
+		}()
+
+		// 执行发送过来的任务
+		for i := 0; i < 5; i++ {
+			// 意思是起了5个协程
+			go sendMessageWithGo(sendChan, closeChan)
 		}
+
+		// 关闭
+		for i := 0; i < 5; i++ {
+			<-closeChan
+		}
+		close(closeChan)
+
+		// 直接返回即可
+		uc.Data["json"] = SucceedResp(0, RequestOk, nil, 1)
+		_ = uc.ServeJSON()
 	}
 
+}
+
+// 发送RabbitMQ消息
+func sendMessageWithGo(uData chan SendData, cc chan bool) {
+	for sendData := range uData {
+		//_, _ = models.SendMessageToUser(messageId, userId)
+		models.SendMQMessageToUser(sendData.MessageId, sendData.UserId)
+	}
+	cc <- true
 }

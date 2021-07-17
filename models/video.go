@@ -14,8 +14,8 @@ type Video struct {
 	Title         string
 	SubTitle      string
 	AddTime       int64
-	Imgh          string
-	Imgv          string
+	Img           string
+	Img1          string
 	EpisodesCount int
 	IsEnd         int
 	ChannelId     int
@@ -32,8 +32,8 @@ type VideoDate struct {
 	Title         string
 	SubTitle      string
 	AddTime       int64
-	Imgh          string
-	Imgv          string
+	Img           string
+	Img1          string
 	EpisodesCount int
 	IsEnd         int
 	Comment       int
@@ -266,8 +266,8 @@ func GetCacheChannelTop(channelId int) (int64, []VideoDate, error) {
 					videoDataInfo.Title = videoInfo.Title
 					videoDataInfo.SubTitle = videoInfo.SubTitle
 					videoDataInfo.AddTime = videoInfo.AddTime
-					videoDataInfo.Imgh = videoInfo.Imgh
-					videoDataInfo.Imgv = videoInfo.Imgv
+					videoDataInfo.Img = videoInfo.Img
+					videoDataInfo.Img1 = videoInfo.Img1
 					videoDataInfo.EpisodesCount = videoInfo.EpisodesCount
 					videoDataInfo.IsEnd = videoInfo.IsEnd
 					videoDataInfo.Comment = videoInfo.Comment
@@ -322,8 +322,8 @@ func GetCacheTypeTop(typeId int) (int64, []VideoDate, error) {
 					videoDataInfo.Title = videoInfo.Title
 					videoDataInfo.SubTitle = videoInfo.SubTitle
 					videoDataInfo.AddTime = videoInfo.AddTime
-					videoDataInfo.Imgh = videoInfo.Imgh
-					videoDataInfo.Imgv = videoInfo.Imgv
+					videoDataInfo.Img = videoInfo.Img
+					videoDataInfo.Img1 = videoInfo.Img1
 					videoDataInfo.EpisodesCount = videoInfo.EpisodesCount
 					videoDataInfo.IsEnd = videoInfo.IsEnd
 					videoDataInfo.Comment = videoInfo.Comment
