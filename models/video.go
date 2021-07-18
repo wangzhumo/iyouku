@@ -18,6 +18,7 @@ type Video struct {
 	Img1               string
 	EpisodesCount      int
 	IsEnd              int
+	IsHot              int
 	ChannelId          int
 	Status             int
 	RegionId           int
@@ -356,5 +357,17 @@ func GetTypeTop(typeId int) (int64, []VideoDate, error) {
 		"channel_id, add_time, img, img1 ,episodes_count ,comment "+
 		"FROM video WHERE status=1 AND type_id=?  "+
 		"ORDER BY comment DESC LIMIT 10", typeId).QueryRows(&videos)
+	return rows, videos, err
+}
+
+// GetAllVideoList 获取所有的视频信息
+func GetAllVideoList() (int64, []Video, error) {
+	o := orm.NewOrm()
+	var videos []Video
+	rows, err := o.Raw("SELECT id, title, sub_title, status, " +
+		"add_time, img, img1 ,channel_id, type_id,region_id,user_id, " +
+		"episodes_count ,episodes_update_time,is_end,is_hot,is_recommend, comment " +
+		"FROM video").QueryRows(&videos)
+
 	return rows, videos, err
 }

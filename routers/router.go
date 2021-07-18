@@ -14,9 +14,16 @@ import (
 )
 
 func init() {
+	// 用户相关的 - 注册，登录
 	beego.Include(&controllers.UserController{})
+	// 视频 信息，列表
 	beego.Include(&controllers.VideoController{})
+	// 获取地区/类型信息
 	beego.Include(&controllers.BasicController{})
+	// 评论相关
 	beego.Include(&controllers.CommentController{})
+	// 排行榜
 	beego.Include(&controllers.TopController{})
+	// 其他 elasticsearch 脚本
+	beego.Include(&controllers.OtherController{})
 }

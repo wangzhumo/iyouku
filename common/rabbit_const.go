@@ -6,3 +6,5 @@ const CommentDlxQueue = "iyouku_comment_queue"
 const CommentQueue = "iyouku_comment_queue"
 const CommentDlxExchange = "iyouku_comment_dlx_exchange"
 const CommentExchange = "iyouku_comment_dlx_exchange"
+
+const EsIndexName = "iyouku_video"

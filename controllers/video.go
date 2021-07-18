@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"encoding/json"
+
+	"com.wangzhumo.iyouku/common"
 	"com.wangzhumo.iyouku/models"
+	esclient "com.wangzhumo.iyouku/services/es"
 	beego "github.com/beego/beego/v2/server/web"
 )
 
@@ -183,6 +187,59 @@ func (vc *VideoController) GetVideoEpisode() {
 		_ = vc.ServeJSON()
 	} else {
 		vc.Data["json"] = SucceedResp(0, RequestOk, videoEpisodes, count)
+		_ = vc.ServeJSON()
+	}
+}
+
+// SearchVideoByKeyword 搜索视频
+// @router /video/search [*]
+func (vc *VideoController) SearchVideoByKeyword() {
+	keyword := vc.GetString("keyword")
+	limit, _ := vc.GetInt("limit")
+	offset, _ := vc.GetInt("offset")
+	if keyword == "" {
+		vc.Data["json"] = ErrorResp(4001, NoKeyword)
+		_ = vc.ServeJSON()
+	}
+
+	// 可选的参数,但是需要指定默认值
+	if limit == 0 {
+		limit = 10
+	}
+
+	querySort := []map[string]string{
+		map[string]string{
+			"id": "desc",
+		},
+	}
+
+	queryParams := map[string]interface{}{
+		"bool": map[string]interface{}{
+			"must": map[string]interface{}{
+				"term": map[string]interface{}{
+					"title": keyword,
+				},
+			},
+		},
+	}
+	hd, err := esclient.EsSearch(common.EsIndexName, queryParams, offset, limit, querySort)
+	if err != nil {
+		vc.Data["json"] = ErrorResp(4004, VideoSearchError)
+		_ = vc.ServeJSON()
+	} else {
+		// 获取数据
+		total := hd.Total.Value
+		var data []models.Video
+
+		for _, v := range hd.Hits {
+			var temp models.Video
+			err = json.Unmarshal([]byte(v.Source), &temp)
+			if err == nil {
+				data = append(data, temp)
+			}
+		}
+
+		vc.Data["json"] = SucceedResp(0, RequestOk, data, int64(total))
 		_ = vc.ServeJSON()
 	}
 }

@@ -61,6 +61,15 @@ func init() {
             Filters: nil,
             Params: nil})
 
+    beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:OtherController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:OtherController"],
+        beego.ControllerComments{
+            Method: "SendAllVideoToES",
+            Router: "/video/send/es",
+            AllowHTTPMethods: []string{"*"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
     beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:TopController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:TopController"],
         beego.ControllerComments{
             Method: "GetChannelTop",
@@ -164,6 +173,15 @@ func init() {
         beego.ControllerComments{
             Method: "GetVideoInfo",
             Router: "/video/info",
+            AllowHTTPMethods: []string{"*"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:VideoController"] = append(beego.GlobalControllerRouter["com.wangzhumo.iyouku/controllers:VideoController"],
+        beego.ControllerComments{
+            Method: "SearchVideoByKeyword",
+            Router: "/video/search",
             AllowHTTPMethods: []string{"*"},
             MethodParams: param.Make(),
             Filters: nil,
